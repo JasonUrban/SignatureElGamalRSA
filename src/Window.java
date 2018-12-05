@@ -215,7 +215,7 @@ class Window extends JFrame {
                     }
                     signatureText.setText(signatureOut.toString());
                 } else {
-                    String trimmed = signatureText.getText().replaceAll("\\s+","");
+                    String trimmed = signatureText.getText().replaceAll("\\s+", "");
                     String[] vals = trimmed.split(",");
                     if (vals.length != 2) {
                         JOptionPane.showMessageDialog(Window.this, "Signature must consist of 2 values separated by a comma!\n",
@@ -224,7 +224,7 @@ class Window extends JFrame {
                         isHex.setSelected(false);
                         return;
                     }
-                    if(!trimmed.matches("[0-9,]+")) {
+                    if (!trimmed.matches("[0-9,]+")) {
                         JOptionPane.showMessageDialog(Window.this, "Incorrect input!\n" +
                                         "To convert signature to hex it must contain 2 decimals",
                                 "Error!",
@@ -297,7 +297,7 @@ class Window extends JFrame {
                     }
                     signatureText.setText(signatureOut.toString());
                 } else {
-                    String trimmed = signatureText.getText().replaceAll("\\s+","").toUpperCase();
+                    String trimmed = signatureText.getText().replaceAll("\\s+", "").toUpperCase();
                     String[] vals = trimmed.split(",");
                     if (vals.length != 2) {
                         JOptionPane.showMessageDialog(Window.this, "Signature must consist of 2 values separated by a comma!\n",
@@ -306,7 +306,7 @@ class Window extends JFrame {
                         isHex.setSelected(true);
                         return;
                     }
-                    if(!trimmed.matches("[0-9A-F,]+")) {
+                    if (!trimmed.matches("[0-9A-F,]+")) {
                         JOptionPane.showMessageDialog(Window.this, "Incorrect input!\n" +
                                         "To convert signature to decimal it must contain 2 hexadecimals",
                                 "Error!",
@@ -595,7 +595,7 @@ class Window extends JFrame {
                             JOptionPane.WARNING_MESSAGE);
                 }
             } else {
-                Object[] vals = signature.replaceAll("\\s+","").split(",");
+                Object[] vals = signature.replaceAll("\\s+", "").split(",");
                 BigInteger p = new BigInteger(this.p.getValue().toString()), g = new BigInteger(this.q.getValue().toString()), y = new BigInteger(this.e.getValue().toString());
                 BigInteger r = new BigInteger((String) vals[0]), s = new BigInteger((String) vals[1]);
                 MessageDigest md = null;
