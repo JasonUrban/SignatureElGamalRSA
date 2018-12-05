@@ -24,7 +24,7 @@ class Window extends JFrame {
     Window(String name) {
         super(name);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        MyPanel panel = new MyPanel();
+        MyPanel panel = new MyPanel(null);
         panel.setLayout(null);
         sourceText = new JTextArea();
         outputText = new JTextArea();
@@ -123,6 +123,17 @@ class Window extends JFrame {
         encryptButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         decryptButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         clearButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        sourceLabel.setForeground(Color.white);
+        RSAMode.setForeground(Color.white);
+        ElGamalMode.setForeground(Color.white);
+        isHex.setForeground(Color.white);
+        keyByDefault.setForeground(Color.white);
+        encrypt.setForeground(Color.white);
+        decrypt.setForeground(Color.white);
+        pLabel.setForeground(Color.white);
+        qLabel.setForeground(Color.white);
+        eLabel.setForeground(Color.white);
+        signatureLabel.setForeground(Color.white);
         sourceText.setFont(new Font("System Regular", Font.PLAIN, 16));
         outputText.setFont(new Font("System Regular", Font.PLAIN, 16));
         signatureText.setFont(new Font("System Regular", Font.PLAIN, 16));
@@ -454,6 +465,10 @@ class Window extends JFrame {
     }
 
     public class MyPanel extends JPanel {
+        MyPanel(LayoutManager layout) {
+            super(layout);
+        }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -461,10 +476,20 @@ class Window extends JFrame {
             g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             int w = getWidth();
             int h = getHeight();
-            Color color1 = new Color(255, 242, 130);
-            Color color2 = new Color(255, 114, 0);
-            GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
-            g2d.setPaint(gp);
+            Color shadeColor = new Color(0, 114, 0),
+                    primaryLeft = new Color(0, 0, 250),
+                    primaryRight = new Color(255, 255, 255);
+            int rC = shadeColor.getRed();
+            int gC = shadeColor.getGreen();
+            int bC = shadeColor.getBlue();
+            GradientPaint primary = new GradientPaint(
+                    0f, 0f, primaryLeft, w, 0f, primaryRight);
+            GradientPaint shade = new GradientPaint(
+                    0f, 0f, new Color(rC, gC, bC, 0),
+                    0f, h, shadeColor);
+            g2d.setPaint(primary);
+            g2d.fillRect(0, 0, w, h);
+            g2d.setPaint(shade);
             g2d.fillRect(0, 0, w, h);
         }
     }
