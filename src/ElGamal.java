@@ -4,9 +4,9 @@ import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
 class ElGamal {
-    private BigInteger[] arr = new BigInteger[3];
+    private static BigInteger[] arr = new BigInteger[3];
 
-    private BigInteger[] xgcd(BigInteger a, BigInteger b) {
+    private static BigInteger[] xgcd(BigInteger a, BigInteger b) {
         if (b.equals(BigInteger.ZERO)) {
             arr[2] = BigInteger.ZERO;
             arr[1] = BigInteger.ONE;
@@ -21,7 +21,7 @@ class ElGamal {
         return arr;
     }
 
-    private boolean isPrime(long n) {
+    private static boolean isPrime(long n) {
         if (n == 1)
             return false;
         for (int i = 2; i * i <= n; i++) {
@@ -31,7 +31,7 @@ class ElGamal {
         return true;
     }
 
-    private BigInteger mod_inverse(BigInteger a, BigInteger b) {
+    private static BigInteger mod_inverse(BigInteger a, BigInteger b) {
         BigInteger[] tmp = xgcd(a, b);
         if (!tmp[0].equals(BigInteger.ONE))
             throw new ArithmeticException("Mod Inverse is not possible!");
@@ -40,11 +40,11 @@ class ElGamal {
         else return tmp[1].add(b);
     }
 
-    private boolean notRelativelyPrime(BigInteger a, BigInteger b) {
+    private static boolean notRelativelyPrime(BigInteger a, BigInteger b) {
         return !a.gcd(b).equals(BigInteger.ONE);
     }
 
-    String byteArrayToHexString(byte[] b) {
+    static String byteArrayToHexString(byte[] b) {
         StringBuilder result = new StringBuilder();
         for (byte aB : b) {
             result.append(Integer.toString((aB & 0xff) + 0x100, 16).substring(1));
@@ -52,9 +52,9 @@ class ElGamal {
         return result.toString().toUpperCase();
     }
 
-    BigInteger[] getParameters(char choice) {
+    static BigInteger[] getParameters(boolean choice) {
         int pInt, gInt, xInt;
-        if (choice == '1') {
+        if (!choice) {
             while (true) {
                 System.out.println("Input parameters p, g, secret key x:");
                 Scanner scanner = new Scanner(System.in);
@@ -64,6 +64,10 @@ class ElGamal {
                     xInt = scanner.nextInt();
                 } catch (InputMismatchException e) {
                     System.out.println("Incorrect input!");
+                    continue;
+                }
+                if (pInt < 10000) {
+                    System.out.println("p is very small! Try value more than 10K!");
                     continue;
                 }
                 if (pInt > 1000000) {
@@ -96,7 +100,7 @@ class ElGamal {
         } else {
             int temp;
             do {
-                pInt = ThreadLocalRandom.current().nextInt(2, 1000000 + 1);
+                pInt = ThreadLocalRandom.current().nextInt(10000, 1000000 + 1);
                 gInt = ThreadLocalRandom.current().nextInt(2, (pInt - 1) + 1);
                 xInt = ThreadLocalRandom.current().nextInt(2, (pInt - 2) + 1);
                 temp = new BigInteger(Integer.toString(gInt)).modPow(new BigInteger(Integer.toString(pInt - 1)), new BigInteger(Integer.toString(pInt))).intValue();
@@ -106,7 +110,8 @@ class ElGamal {
         return new BigInteger[]{p, g, x};
     }
 
-    BigInteger[] sign(BigInteger p, BigInteger g, BigInteger x, char choice, String hash) {
+    static BigInteger[] sign(BigInteger[] publicKey, boolean choice, String hash) {
+        BigInteger p = publicKey[0], g = publicKey[1], x = publicKey[2];
         BigInteger y = g.modPow(x, p);
         BigInteger pMin1 = p.subtract(BigInteger.ONE);
         int kInt;
@@ -114,7 +119,7 @@ class ElGamal {
         boolean isCorrect_s = false;
         while (!isCorrect_s) {
             while (true) {
-                if (choice != '1') {
+                if (choice) {
                     kInt = ThreadLocalRandom.current().nextInt(2, (pMin1.intValue() - 1) + 1);
                     k = new BigInteger(Integer.toString(kInt));
                     if (notRelativelyPrime(k, pMin1)) {
@@ -150,18 +155,27 @@ class ElGamal {
                 s = s.multiply(mod_inverse(k, pMin1));
                 s = s.mod(pMin1);
             } catch (ArithmeticException e) {
-                if (choice == '1') {
+                if (!choice) {
                     System.out.println(e.getMessage());
                 }
                 isCorrect_s = false;
             }
             if (s.equals(BigInteger.ZERO)) {
-                if (choice == '1') {
+                if (!choice) {
                     System.out.println("s doesn't exist!");
                 }
                 isCorrect_s = false;
             }
         }
         return new BigInteger[]{y, k, r, s};
+    }
+
+    static boolean verify(BigInteger[] publicKey, BigInteger[] signature, String hash) {
+        BigInteger p = publicKey[0], g = publicKey[1], y = publicKey[2];
+        BigInteger r = signature[0], s = signature[1];
+        if (r.compareTo(BigInteger.ZERO) <= 0 || r.compareTo(p) >= 0 || s.compareTo(BigInteger.ZERO) <= 0 || s.compareTo(p.subtract(BigInteger.ONE)) >= 0) {
+            return false;
+        }
+        return y.pow(r.intValue()).multiply(r.pow(s.intValue())).mod(p).equals(g.modPow(new BigInteger(hash, 16), p));
     }
 }
