@@ -20,6 +20,8 @@ class Window extends JFrame {
     private JButton decryptButton;
     private JRadioButton RSAMode;
     private JRadioButton ElGamalMode;
+    private JRadioButton encrypt;
+    JRadioButton decrypt;
 
     Window(String name) {
         super(name);
@@ -51,8 +53,8 @@ class Window extends JFrame {
         JLabel qLabel = new JLabel("Large prime number q:");
         JLabel eLabel = new JLabel("Parameter e coprime to the \uD835\uDED7(p⋅q), (1 < e < \uD835\uDED7(p⋅q)):");
         JLabel signatureLabel = new JLabel("Signature:");
-        JRadioButton encrypt = new JRadioButton("Encrypt");
-        JRadioButton decrypt = new JRadioButton("Decrypt");
+        encrypt = new JRadioButton("Encrypt");
+        decrypt = new JRadioButton("Decrypt");
         JLabel image = new JLabel(new ImageIcon(System.getProperty("user.dir") + "\\src\\key.png"));
         RSAMode.setSize(150, 50);
         ElGamalMode.setSize(150, 50);
@@ -525,7 +527,7 @@ class Window extends JFrame {
         }
         assert source != null;
         assert signature != null;
-        if ((source.length() % 4 != 0 || signature.length() % 4 != 0) && RSAMode.isSelected()) {
+        if ((source.length() % 4 != 0 || signature.length() % 4 != 0) && RSAMode.isSelected() && decrypt.isSelected()) {
             JOptionPane.showMessageDialog(Window.this, "Length of the UTF-8 text not multiple by 4!\n" +
                             "Every 4 symbols result in 1 symbol decoded!\n" +
                             "Try once again...",
@@ -587,6 +589,7 @@ class Window extends JFrame {
                         "Your private key is {" + d + ", " + n + "}.\n" +
                         "Don't forget it!");
                 output = RSA.RSAAlgorithm(source, new BigInteger[]{eValue, n}, false);
+                setText(output, outputText);
                 signature = RSA.sign(source, new BigInteger[]{d, n});
                 setText(signature, signatureText);
             } else {
@@ -597,18 +600,20 @@ class Window extends JFrame {
                     e.printStackTrace();
                 }
                 output = ElGamal.byteArrayToHexString(Objects.requireNonNull(md).digest(source.getBytes()));
+                setText(output, outputText);
                 BigInteger[] publicKey = ElGamal.getParameters(keyByDefault.isSelected());
                 BigInteger[] ElGamalSignature = ElGamal.sign(publicKey, keyByDefault.isSelected(), output);
+                signatureText.setText(ElGamalSignature[2].intValue() + ", " + ElGamalSignature[3].intValue());
                 BigInteger p = publicKey[0], g = publicKey[1], y = ElGamalSignature[0];
                 showTextAreaDialog("Your public key is {" + p.intValue() + ", " + g.intValue() + ", " + y.intValue() + "}.\n" +
                         "Don't forget it!");
-                signatureText.setText(ElGamalSignature[2].intValue() + ", " + ElGamalSignature[3].intValue());
             }
         } else {
             if (RSAMode.isSelected()) {
                 key[0] = new BigInteger(p.getValue().toString());
                 key[1] = new BigInteger(q.getValue().toString());
                 output = RSA.RSAAlgorithm(source, key, true);
+                setText(output, outputText);
                 boolean signed = RSA.verify(output, signature, new BigInteger[]{new BigInteger(e.getValue().toString()), key[1]});
                 if (signed) {
                     JOptionPane.showMessageDialog(Window.this, "Message was signed correctly!",
@@ -639,10 +644,8 @@ class Window extends JFrame {
                             "Attention",
                             JOptionPane.WARNING_MESSAGE);
                 }
-                output = "";
             }
         }
-        setText(output, outputText);
     }
 
     private void showTextAreaDialog(String message) {
