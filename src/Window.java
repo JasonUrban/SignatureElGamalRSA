@@ -21,7 +21,7 @@ class Window extends JFrame {
     private JRadioButton RSAMode;
     private JRadioButton ElGamalMode;
     private JRadioButton encrypt;
-    JRadioButton decrypt;
+    private JRadioButton decrypt;
 
     Window(String name) {
         super(name);
